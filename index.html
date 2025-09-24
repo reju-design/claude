@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>兑换码系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            display: none;
+            color: #666;
+            margin-top: 1rem;
+        }
+
+        .spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        .redirect-btn {
+            margin-top: 1rem;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">兑</div>
+        <h1>兑换码系统</h1>
+        <p class="subtitle">请输入您的兑换码获取Claude API访问权限</p>
+        
+        <form id="redeemForm">
+            <div class="input-group">
+                <label for="redeemCode">兑换码</label>
+                <input type="text" id="redeemCode" placeholder="请输入兑换码" required>
+            </div>
+            
+            <button type="submit" class="btn" id="submitBtn">
+                立即兑换
+            </button>
+        </form>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            正在验证兑换码...
+        </div>
+        
+        <div class="result" id="result"></div>
+        
+        <div class="footer">
+            <p>安全 · 快速 · 可靠</p>
+        </div>
+    </div>
+
+    <script>
+        // 兑换码验证函数
+        async function validateRedeemCode(code) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    // 模拟Claude API兑换码验证
+                    const validCodes = {
+                        'CLAUDE2024': {
+                            success: true,
+                            message: '兑换成功！您获得了Claude API访问权限',
+                            data: {
+                                type: 'Claude API',
+                                apiKey: 'sk-ant-api03-' + Math.random().toString(36).substr(2, 48),
+                                duration: '30天',
+                                quota: '100,000 tokens'
+                            }
+                        },
+                        'APIKEY100': {
+                            success: true,
+                            message: '兑换成功！您获得了Claude API试用权限',
+                            data: {
+                                type: 'Claude API Trial',
+                                apiKey: 'sk-ant-api03-' + Math.random().toString(36).substr(2, 48),
+                                duration: '7天',
+                                quota: '10,000 tokens'
+                            }
+                        },
+                        'PREMIUM2024': {
+                            success: true,
+                            message: '兑换成功！您获得了Claude API Premium权限',
+                            data: {
+                                type: 'Claude API Premium',
+                                apiKey: 'sk-ant-api03-' + Math.random().toString(36).substr(2, 48),
+                                duration: '90天',
+                                quota: '1,000,000 tokens'
+                            }
+                        }
+                    };
+
+                    if (validCodes[code.toUpperCase()]) {
+                        resolve(validCodes[code.toUpperCase()]);
+                    } else if (code.length < 6) {
+                        resolve({
+                            success: false,
+                            message: '兑换码格式错误，请检查后重试'
+                        });
+                    } else {
+                        resolve({
+                            success: false,
+                            message: '兑换码无效或已过期'
+                        });
+                    }
+                }, 1500);
+            });
+        }
+
+        // 跳转到Claude API页面
+        function redirectToClaudeAPI(apiData) {
+            // 将API信息存储到localStorage
+            localStorage.setItem('claudeApiData', JSON.stringify(apiData));
+            
+            // 延迟跳转，让用户看到成功信息
+            setTimeout(() => {
+                window.location.href = './claude-api.html';
+            }, 2000);
+        }
+
+        // 表单提交处理
+        document.getElementById('redeemForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const code = document.getElementById('redeemCode').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            
+            // 显示加载状态
+            submitBtn.disabled = true;
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            
+            try {
+                const response = await validateRedeemCode(code);
+                
+                result.className = 'result ' + (response.success ? 'success' : 'error');
+                
+                if (response.success) {
+                    let resultHTML = `<h3>🎉 ${response.message}</h3>`;
+                    
+                    if (response.data) {
+                        resultHTML += '<div style="margin-top: 1rem; text-align: left;">';
+                        resultHTML += `<p><strong>服务类型：</strong>${response.data.type}</p>`;
+                        resultHTML += `<p><strong>有效期：</strong>${response.data.duration}</p>`;
+                        resultHTML += `<p><strong>配额：</strong>${response.data.quota}</p>`;
+                        resultHTML += '</div>';
+                        
+                        resultHTML += `<button class="btn redirect-btn" onclick="redirectToClaudeAPI(${JSON.stringify(response.data).replace(/"/g, '&quot;')})">
+                            立即前往Claude API控制台 →
+                        </button>`;
+                    }
+                    
+                    result.innerHTML = resultHTML;
+                    
+                    // 清空输入框
+                    document.getElementById('redeemCode').value = '';
+                    
+                    // 自动跳转（可选）
+                    if (response.data) {
+                        redirectToClaudeAPI(response.data);
+                    }
+                } else {
+                    result.innerHTML = `<h3>❌ ${response.message}</h3>`;
+                }
+                
+                result.style.display = 'block';
+                
+            } catch (error) {
+                result.className = 'result error';
+                result.innerHTML = '<h3>❌ 系统错误，请稍后重试</h3>';
+                result.style.display = 'block';
+            }
+            
+            loading.style.display = 'none';
+            submitBtn.disabled = false;
+        });
+
+        // 输入框实时验证
+        document.getElementById('redeemCode').addEventListener('input', function(e) {
+            const code = e.target.value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (code.length > 0) {
+                submitBtn.textContent = '立即兑换';
+            } else {
+                submitBtn.textContent = '请输入兑换码';
+            }
+        });
+    </script>
+</body>
+</html>
